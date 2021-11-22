@@ -24,6 +24,7 @@ target_sources(not_chess PRIVATE
   include/screen_factory.hpp
   include/entities_factory.hpp
   include/position_component.hpp
+  include/ai_component.hpp
 
   implementation/app.cpp
   implementation/game.cpp
@@ -40,7 +41,8 @@ target_sources(not_chess PRIVATE
   implementation/input_component.cpp
   implementation/sound_component.cpp
   implementation/sprite_component.cpp
-  implementation/grid_component.cpp)
+  implementation/grid_component.cpp
+  implementation/ai_component.cpp)
 
 target_link_libraries(not_chess PRIVATE sfml-graphics sfml-audio)
 target_include_directories(not_chess PRIVATE ${CMAKE_SOURCE_DIR}/src/include)

@@ -14,6 +14,7 @@
 
 #include <memory>
 #include <vector>
+#include <optional>
 
 namespace not_chess
 {
@@ -36,7 +37,8 @@ public:
         EntityId player;
         EntityId ai_player;
         EntityId board;
-        bool player_turn = true;
+        bool player_turn { true };
+        std::optional<sf::Vector2i> active_tile;
     };
 
 
@@ -64,8 +66,7 @@ private:
     void InitScreens();
 
     // hardcoded values
-    void InitBlackPawnPositions();
-    void InitWhitePawnPositions();
+    void InitPawnPositions(std::vector<EntityId>& pawns, int offset);
 
     bool m_finished = false; // TODO: may be atomic_bool in multithreaded environment
 

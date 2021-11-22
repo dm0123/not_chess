@@ -12,10 +12,9 @@ public:
     enum class Key
     {
         Space,
-        LeftMouse,
         Esc,
-        Touch,
         Left,
+        Right,
         Up,
         Down,
         W, A, S, D

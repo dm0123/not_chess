@@ -3,6 +3,8 @@
 #include <sprite_component.hpp>
 #include <grid_component.hpp>
 #include <position_component.hpp>
+#include <input_component.hpp>
+#include <ai_component.hpp>
 #include <game.hpp>
 
 #include <vector>
@@ -50,18 +52,11 @@ void GameEntitiesFactory::MakePawns() const
     }
     m_game.m_data.black_pawns = black_pawns;
 
-    // hardcode positions
-    for(EntityId entity_id : black_pawns)
-    {
-        Entity const& entity = ECSManager::Instance().Get(entity_id);
-
-    }
-
     std::vector<EntityId> white_pawns;
     white_pawns.reserve(9);
     for(int i = 0; i < pawns_count; ++i)
     {
-        MakePawn(false, i);
+        white_pawns.push_back(MakePawn(false, i));
     }
     m_game.m_data.white_pawns = white_pawns;
 }
@@ -73,5 +68,24 @@ void GameEntitiesFactory::MakeBoard() const
     auto grid_component = std::make_unique<GridComponent>();
     comps.push_back(std::move(grid_component));
     m_game.m_data.board = ecs_instance.MakeEntity("board", std::move(comps));
+}
+
+void GameEntitiesFactory::MakePlayer() const
+{
+    auto& ecs_instance = ECSManager::Instance();
+    std::vector<std::unique_ptr<AbstractComponent>> comps;
+    std::unique_ptr<InputComponent> input_component = std::make_unique<InputComponent>();
+    m_game.m_input.AddPressedEventHandler(input_component->InputHandler());
+    comps.push_back(std::move(input_component));
+    m_game.m_data.player = ecs_instance.MakeEntity("player", std::move(comps));
+}
+
+void GameEntitiesFactory::MakeAI() const
+{
+    auto& ecs_instance = ECSManager::Instance();
+    std::vector<std::unique_ptr<AbstractComponent>> components;
+    components.push_back(std::make_unique<AiComponent>());
+    m_game.m_data.ai_player = ecs_instance.MakeEntity("ai_player", std::move(components));
+
 }
 } // namespace not_chess

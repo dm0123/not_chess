@@ -78,6 +78,11 @@ void Game::AddStateChangeListener(core::EventHandler<State> state_changed)
     m_state_event += state_changed;
 }
 
+void Game::AddTickEventListener(core::EventHandler<> tick_listener)
+{
+    m_tick_event += tick_listener;
+}
+
 
 void Game::OnDrawEvent()
 {
@@ -111,9 +116,6 @@ void Game::OnPause()
 
 void Game::OnPlay()
 {
-    // if(!m_data.player_turn)
-        // Make ai move
-
 }
 
 void Game::OnMainMenu()
@@ -136,7 +138,10 @@ void Game::MakeEntities()
 {
     m_entities_factory.MakePawns();
     m_entities_factory.MakeBoard();
-    InitBlackPawnPositions();
+
+    // hardcode pawn initial positions
+    InitPawnPositions(m_data.black_pawns, 0);
+    InitPawnPositions(m_data.white_pawns, 5);
 }
 
 void Game::InitScreens()
@@ -146,35 +151,20 @@ void Game::InitScreens()
     m_screens.push_back(m_screen_factory.MakeMainMenuScreen());
 }
 
-void Game::InitBlackPawnPositions()
+void Game::InitPawnPositions(std::vector<EntityId>& pawns, int offset)
 {
     for(int i = 0; i < 3; ++i)
     {
+        int column = i + offset;
         for(int j = 0; j < 3; ++j)
         {
-            EntityId pawn_id = m_data.black_pawns[j + (i *3)];
+            int row = j + offset;
+            EntityId pawn_id = pawns[j + (i *3)];
             auto& pos_ptr = ECSManager::Instance().ComponentByName(pawn_id, "position"sv);
             if(pos_ptr)
             {
                 PositionComponent* position = static_cast<PositionComponent*>(pos_ptr.get());
-                position->SetPosition(j, i);
-            }
-        }
-    }
-}
-
-void Game::InitWhitePawnPositions()
-{
-    for(int i = 5; i < 8; ++i)
-    {
-        for(int j = 5; j < 8; ++j)
-        {
-            EntityId pawn_id = m_data.white_pawns[j + (i *3)];
-            auto& pos_ptr = ECSManager::Instance().ComponentByName(pawn_id, "position"sv);
-            if(pos_ptr)
-            {
-                PositionComponent* position = static_cast<PositionComponent*>(pos_ptr.get());
-                position->SetPosition(j, i);
+                position->SetPosition(row, column);
             }
         }
     }

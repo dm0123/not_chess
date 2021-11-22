@@ -14,33 +14,49 @@ void Input::Process(sf::Event const& event)
 {
     switch(event.type)
     {
-    case sf::Event::MouseButtonPressed:
-        if(event.mouseButton.button == sf::Mouse::Button::Left)
-            m_pressed_event(Key::LeftMouse);
-        break;
-    case sf::Event::MouseButtonReleased:
-        if(event.mouseButton.button == sf::Mouse::Button::Left)
-            m_released_event(Key::LeftMouse);
-        break;
     case sf::Event::KeyPressed:
         if(event.key.code == sf::Keyboard::Key::Space)
             m_pressed_event(Key::Space);
         else if(event.key.code == sf::Keyboard::Key::Escape)
             m_pressed_event(Key::Esc);
+        else if(event.key.code == sf::Keyboard::Key::Left)
+            m_pressed_event(Key::Left);
+        else if(event.key.code == sf::Keyboard::Key::Right)
+            m_pressed_event(Key::Right);
+        else if(event.key.code == sf::Keyboard::Key::Up)
+            m_pressed_event(Key::Up);
+        else if(event.key.code == sf::Keyboard::Key::Down)
+            m_pressed_event(Key::Down);
+        else if(event.key.code == sf::Keyboard::Key::W)
+            m_pressed_event(Key::W);
+        else if(event.key.code == sf::Keyboard::Key::A)
+            m_pressed_event(Key::A);
+        else if(event.key.code == sf::Keyboard::Key::S)
+            m_pressed_event(Key::S);
+        else if(event.key.code == sf::Keyboard::Key::D)
+            m_pressed_event(Key::D);
         break;
     case sf::Event::KeyReleased:
         if(event.key.code == sf::Keyboard::Key::Space)
             m_released_event(Key::Space);
         else if(event.key.code == sf::Keyboard::Key::Escape)
             m_released_event(Key::Esc);
-        break;
-    case sf::Event::TouchBegan:
-        if(event.touch.finger == 0)
-            m_pressed_event(Key::Touch);
-        break;
-    case sf::Event::TouchEnded:
-        if(event.touch.finger == 0)
-            m_released_event(Key::Touch);
+        else if(event.key.code == sf::Keyboard::Key::Left)
+            m_released_event(Key::Left);
+        else if(event.key.code == sf::Keyboard::Key::Right)
+            m_released_event(Key::Right);
+        else if(event.key.code == sf::Keyboard::Key::Up)
+            m_released_event(Key::Up);
+        else if(event.key.code == sf::Keyboard::Key::Down)
+            m_released_event(Key::Down);
+        else if(event.key.code == sf::Keyboard::Key::W)
+            m_released_event(Key::W);
+        else if(event.key.code == sf::Keyboard::Key::A)
+            m_released_event(Key::A);
+        else if(event.key.code == sf::Keyboard::Key::S)
+            m_released_event(Key::S);
+        else if(event.key.code == sf::Keyboard::Key::D)
+            m_released_event(Key::D);
         break;
     default:
         break;

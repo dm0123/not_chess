@@ -13,6 +13,8 @@ public:
 
     void MakePawns() const;
     void MakeBoard() const;
+    void MakePlayer() const;
+    void MakeAI() const;
 private:
     Game& m_game;
 };

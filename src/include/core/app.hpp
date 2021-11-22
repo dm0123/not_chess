@@ -12,7 +12,7 @@ class App
 public:
     struct Options
     {
-        Options() : width(900), height(900), window_title("Not Chess")
+        Options() : width(600), height(600), window_title("Not Chess")
         {
         }
 
