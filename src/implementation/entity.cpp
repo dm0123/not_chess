@@ -1,5 +1,6 @@
 #include <entity.hpp>
 #include <core/app_exception.hpp>
+#include <iostream>
 
 namespace not_chess
 {
@@ -82,7 +83,9 @@ ECSManager::ECSManager() : m_game_tick_handler([this]()
                                for(Entity& e : m_entities)
                                    for(std::unique_ptr<AbstractComponent>& component_ptr : e.m_components)
                                        if(component_ptr)
+                                       {
                                            component_ptr->Update();
+                                       }
                            })
 {
 }

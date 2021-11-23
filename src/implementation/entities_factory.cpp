@@ -75,7 +75,6 @@ void GameEntitiesFactory::MakePlayer() const
     auto& ecs_instance = ECSManager::Instance();
     std::vector<std::unique_ptr<AbstractComponent>> comps;
     std::unique_ptr<InputComponent> input_component = std::make_unique<InputComponent>();
-    m_game.m_input.AddPressedEventHandler(input_component->InputHandler());
     comps.push_back(std::move(input_component));
     m_game.m_data.player = ecs_instance.MakeEntity("player", std::move(comps));
 }
@@ -84,7 +83,9 @@ void GameEntitiesFactory::MakeAI() const
 {
     auto& ecs_instance = ECSManager::Instance();
     std::vector<std::unique_ptr<AbstractComponent>> components;
-    components.push_back(std::make_unique<AiComponent>());
+    auto ai_component = std::make_unique<AiComponent>();
+    ai_component->SetGame(m_game);
+    components.push_back(std::move(ai_component));
     m_game.m_data.ai_player = ecs_instance.MakeEntity("ai_player", std::move(components));
 
 }

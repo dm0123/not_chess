@@ -29,16 +29,37 @@ public:
         MainMenu, Playing, Paused
     };
 
+    enum class InputMode
+    {
+        Choosing,
+        Moving
+    };
+
+    struct PlayerInputMode
+    {
+        InputMode mode;
+        void Next() noexcept
+        {
+            if(mode == InputMode::Choosing)
+                mode = InputMode::Moving;
+            else mode = InputMode::Choosing;
+        }
+    };
+
 
     struct GameData
     {
         std::vector<EntityId> white_pawns;
         std::vector<EntityId> black_pawns;
+
         EntityId player;
         EntityId ai_player;
         EntityId board;
+
         bool player_turn { true };
         std::optional<sf::Vector2i> active_tile;
+        sf::Vector2i cursor_tile {0, 0};
+        PlayerInputMode input_mode;
     };
 
 
@@ -53,24 +74,34 @@ public:
     void AddTickEventListener(core::EventHandler<> tick_listener);
     void OnWindowEvent(sf::Event event);
     void OnDrawEvent();
+    void OnInput(core::Input::Key key);
 
     void OnStateChange(State new_state);
 
     void OnPause();
     void OnPlay();
     void OnMainMenu();
+    GameData& Data() { return m_data; }
+
+    bool MovePawn(EntityId pawn, core::Input::Key key);
+    bool PositionHasPawn(sf::Vector2i pos);
 
 private:
     void LoadAssets();
     void MakeEntities();
     void InitScreens();
 
+    void MoveCursor(core::Input::Key key);
+    void PlayerMovePawn(core::Input::Key key);
+
+    EntityId FindActivePawn();
+
     // hardcoded values
     void InitPawnPositions(std::vector<EntityId>& pawns, int offset);
 
     bool m_finished = false; // TODO: may be atomic_bool in multithreaded environment
 
-    State m_state;
+    State m_state = State::Playing; // hardcode playing state for now
 
     core::App m_app;
     core::Input m_input;
@@ -83,6 +114,7 @@ private:
     core::EventHandler<> m_finished_handler;
     core::EventHandler<State> m_state_changed_handler; // This is handler for game logic state change
     core::EventHandler<> m_draw_event_handler;
+    core::EventHandler<core::Input::Key> m_input_event_hander;
 
     core::Event<State> m_state_event; // This is event firing when state is changed from handler above
     core::Event<> m_tick_event;

@@ -23,13 +23,22 @@ public:
     Entity& Get(EntityId id);
     Entity& FindByName(std::string_view name);
     void AddComponent(EntityId id, std::unique_ptr<AbstractComponent>&& c);
-    std::unique_ptr<AbstractComponent>& ComponentByName(EntityId id, std::string_view name);
 
-    core::EventHandler<> const& TickListener() const noexcept { return m_game_tick_handler; }
+    template<typename ComponentT>
+    ComponentT* GetComponent(EntityId id, std::string_view name)
+    {
+        std::unique_ptr<AbstractComponent>& component = ComponentByName(id, name);
+        if(!component)
+            return nullptr;
+        return static_cast<ComponentT*>(component.get());
+    }
+
+    core::EventHandler<>& TickListener() noexcept { return m_game_tick_handler; }
 
     std::vector<core::IDrawable*> CollectDrawables(EntityId e_id);
 private:
     ECSManager();
+    std::unique_ptr<AbstractComponent>& ComponentByName(EntityId id, std::string_view name);
     // we may implement some sort of pool here
     // or just use entt library as underlying entity manager
     std::vector<Entity> m_entities;
