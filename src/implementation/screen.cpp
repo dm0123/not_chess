@@ -2,6 +2,7 @@
 #include <entity.hpp>
 #include <component.hpp>
 #include <memory>
+#include <iostream>
 
 namespace not_chess::core
 {
@@ -9,6 +10,16 @@ void SimpleSpriteItem::Draw(sf::RenderWindow& window, sf::Vector2i position)
 {
     m_sprite.setPosition(position.x, position.y);
     window.draw(m_sprite);
+}
+
+Screen::Screen()
+{
+    std::cout << "Make screen" << std::endl;
+}
+
+Screen::~Screen()
+{
+    std::cout << "Destroy screen" << std::endl;
 }
 
 void Screen::AddEntity(EntityId e)

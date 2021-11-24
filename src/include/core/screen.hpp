@@ -39,8 +39,8 @@ private:
 class Screen
 {
 public:
-    Screen() = default;
-    ~Screen() = default;
+    Screen();
+    ~Screen();
 
     void AddEntity(EntityId e);
     void AddEntities(std::vector<EntityId> const& entities);

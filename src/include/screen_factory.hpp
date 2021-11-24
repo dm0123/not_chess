@@ -8,17 +8,19 @@ class Game;
 class GameScreensFactory
 {
 public:
-    GameScreensFactory(Game const& g) : m_game(g)
+    GameScreensFactory(Game& g) : m_game(g)
     {
     }
 
     ~GameScreensFactory() = default;
 
-    core::Screen MakeMainMenuScreen();
-    core::Screen MakeGameScreen();
-    core::Screen MakePauseScreen();
-    core::Screen MakeSettingsScreen();
+    void Init();
+
+    void MakeMainMenuScreen();
+    void MakeGameScreen();
+    void MakePauseScreen();
+    void MakeSettingsScreen();
 private:
-    Game const& m_game;
+    Game& m_game;
 };
 }

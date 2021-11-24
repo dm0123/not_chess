@@ -37,7 +37,7 @@ public:
 
     struct PlayerInputMode
     {
-        InputMode mode;
+        InputMode mode = InputMode::Choosing;
         void Next() noexcept
         {
             if(mode == InputMode::Choosing)
@@ -81,6 +81,8 @@ public:
     void OnPause();
     void OnPlay();
     void OnMainMenu();
+
+    void AddScreen(std::unique_ptr<core::Screen>&& screen_ptr);
     GameData& Data() { return m_data; }
 
     bool MovePawn(EntityId pawn, core::Input::Key key);
@@ -101,11 +103,11 @@ private:
 
     bool m_finished = false; // TODO: may be atomic_bool in multithreaded environment
 
-    State m_state = State::Playing; // hardcode playing state for now
+    State m_state = State::Paused; // hardcode playing state for now
 
     core::App m_app;
     core::Input m_input;
-    std::vector<core::Screen> m_screens;
+    std::vector<std::unique_ptr<core::Screen>> m_screens;
     size_t m_current_screen_index = 0;
 
     GameScreensFactory m_screen_factory;

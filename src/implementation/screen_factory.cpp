@@ -3,30 +3,37 @@
 
 namespace not_chess
 {
-core::Screen GameScreensFactory::MakeMainMenuScreen()
+void GameScreensFactory::Init()
 {
-    core::Screen screen;
-    return screen;
+    MakeGameScreen();
+    MakePauseScreen();
+    MakeMainMenuScreen();
 }
 
-core::Screen GameScreensFactory::MakeGameScreen()
+void GameScreensFactory::MakeMainMenuScreen()
 {
-    core::Screen screen;
-    screen.AddEntity(m_game.m_data.board);
-    screen.AddEntities(m_game.m_data.black_pawns);
-    screen.AddEntities(m_game.m_data.white_pawns);
-    return screen;
+    std::unique_ptr<core::Screen> screen = std::make_unique<core::Screen>();
+    m_game.AddScreen(std::move(screen));
 }
 
-core::Screen GameScreensFactory::MakePauseScreen()
+void GameScreensFactory::MakeGameScreen()
 {
-    core::Screen screen;
-    return screen;
+    std::unique_ptr<core::Screen> screen = std::make_unique<core::Screen>();
+    screen->AddEntity(m_game.m_data.board);
+    screen->AddEntities(m_game.m_data.black_pawns);
+    screen->AddEntities(m_game.m_data.white_pawns);
+    m_game.AddScreen(std::move(screen));
 }
 
-core::Screen GameScreensFactory::MakeSettingsScreen()
+void GameScreensFactory::MakePauseScreen()
 {
-    core::Screen screen;
-    return screen;
+    std::unique_ptr<core::Screen> screen = std::make_unique<core::Screen>();
+    m_game.AddScreen(std::move(screen));
+}
+
+void GameScreensFactory::MakeSettingsScreen()
+{
+    std::unique_ptr<core::Screen> screen = std::make_unique<core::Screen>();
+    m_game.AddScreen(std::move(screen));
 }
 } // namespace not_chess

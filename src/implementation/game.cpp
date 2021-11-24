@@ -92,12 +92,14 @@ void Game::AddTickEventListener(core::EventHandler<> tick_listener)
 
 void Game::OnDrawEvent()
 {
-    if(m_screens.size() > 0)
-        m_screens[m_current_screen_index].Draw(m_app.Window());
+    if(m_screens.size() > 0 && m_screens[m_current_screen_index])
+        m_screens[m_current_screen_index]->Draw(m_app.Window());
 }
 
 void Game::OnInput(core::Input::Key key)
 {
+    if(m_state != State::Playing)
+        return;
     // not player turn yet
     if(!m_data.player_turn)
         return;
@@ -143,6 +145,11 @@ void Game::OnMainMenu()
 {
 }
 
+void Game::AddScreen(std::unique_ptr<core::Screen>&& screen_ptr)
+{
+    m_screens.push_back(std::move(screen_ptr));
+}
+
 void Game::LoadAssets()
 {
     // TODO: this should be loaded from file, but we hardcode assets for now
@@ -169,9 +176,7 @@ void Game::MakeEntities()
 
 void Game::InitScreens()
 {
-    m_screens.push_back(m_screen_factory.MakeGameScreen());
-    m_screens.push_back(m_screen_factory.MakePauseScreen());
-    m_screens.push_back(m_screen_factory.MakeMainMenuScreen());
+    m_screen_factory.Init();
 }
 
 void Game::MoveCursor(core::Input::Key key)
@@ -215,8 +220,11 @@ void Game::PlayerMovePawn(core::Input::Key key)
     if(pawn_id == INVALID_ENTITY)
         return;
 
-    MovePawn(pawn_id, key);
-    m_data.player_turn = false;
+    if(MovePawn(pawn_id, key))
+    {
+        m_data.input_mode.mode = InputMode::Choosing;
+        m_data.player_turn = false;
+    }
 }
 
 bool Game::MovePawn(EntityId pawn_id, core::Input::Key key)
