@@ -10,7 +10,7 @@ cmake ../ -DCMAKE_BUILD_TYPE=Release
 cmake --build .
 ```
 
-The compiled project will be placed into build/src/ directory. You will also need to copy assets folder here because stupid me forgot how write install targets for CMake.
+The compiled project will be placed into build/src/ directory. You will also need to copy assets folder here because stupid me forgot how to write install targets for CMake.
 
 Feel free to spam my inbox
 
