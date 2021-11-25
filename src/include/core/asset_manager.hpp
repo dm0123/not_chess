@@ -25,6 +25,7 @@ public:
     }
 };
 
+/// Abstract asset type for loading assets
 class AbstractAsset
 {
 public:

@@ -16,7 +16,7 @@ public:
 
     void Init();
 
-    void MakeMainMenuScreen();
+    void MakeFinishedScreen();
     void MakeGameScreen();
     void MakePauseScreen();
     void MakeSettingsScreen();

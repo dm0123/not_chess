@@ -7,8 +7,10 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/Text.hpp>
 
 #include <component.hpp>
+#include <core/input.hpp>
 
 namespace not_chess::core
 {
@@ -21,8 +23,11 @@ public:
 
     virtual ~IDrawable() = default;
     virtual void Draw(sf::RenderWindow& window, sf::Vector2i position) {}
+    bool Visible() const noexcept { return m_visible; }
+    void SetVisible(bool is_visible) noexcept { m_visible = is_visible; }
 protected:
     sf::Vector2i m_screen_pos;
+    bool m_visible = true;
 };
 
 
@@ -36,6 +41,17 @@ private:
     sf::Sprite m_sprite;
 };
 
+class TextItem : public IDrawable
+{
+public:
+    TextItem();
+    void SetText(sf::Text const& t) noexcept { m_text = t; }
+    void SetString(std::string_view text) noexcept { m_text.setString(sf::String(text.data())); }
+    void Draw(sf::RenderWindow& window, sf::Vector2i position) override;
+private:
+    sf::Text m_text;
+};
+
 class Screen
 {
 public:
@@ -45,6 +61,9 @@ public:
     void AddEntity(EntityId e);
     void AddEntities(std::vector<EntityId> const& entities);
     void Draw(sf::RenderWindow& window);
+
+    virtual void Update() {}
+    virtual void OnInput(core::Input::Key key) {}
 protected:
     std::vector<EntityId> m_entities;
 };

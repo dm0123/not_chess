@@ -12,7 +12,7 @@ int main(int /*argc*/, char** /*argv*/)
     }
     catch(not_chess::core::AppException const& e)
     {
-        std::cout << e.what() << std::endl;
+        std::cout << "Exception in main thread: " << e.what() << std::endl;
         return 1;
     }
 

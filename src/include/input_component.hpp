@@ -11,7 +11,7 @@ public:
     InputComponent();
     void OnInput(core::Input::Key key);
     core::EventHandler<core::Input::Key> const& InputHandler() const noexcept { return m_input_handler; }
-    std::string_view Name() override;
+    std::string_view Name() const noexcept override;
 private:
     core::EventHandler<core::Input::Key> m_input_handler;
 };

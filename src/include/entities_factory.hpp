@@ -15,6 +15,7 @@ public:
     void MakeBoard() const;
     void MakePlayer() const;
     void MakeAI() const;
+    void MakeText() const;
 private:
     Game& m_game;
 };

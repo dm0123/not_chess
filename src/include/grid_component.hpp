@@ -38,7 +38,7 @@ public:
         m_drawables.push_back(&m_grid);
     }
 
-    std::string_view Name() override { return "grid"sv; }
+    std::string_view Name() const noexcept override { return "grid"sv; }
     void SetActiveTile(int row, int column) noexcept { m_grid.SetActiveTile(row, column); }
 private:
     GridRenderable m_grid;

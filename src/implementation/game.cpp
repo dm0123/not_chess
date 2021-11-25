@@ -3,6 +3,7 @@
 #include <sprite_component.hpp>
 #include <position_component.hpp>
 #include <grid_component.hpp>
+#include <text_component.hpp>
 
 using namespace std::literals;
 
@@ -16,8 +17,8 @@ namespace
     enum  Screens : size_t
     {
         sGame,
-        sMainMenu,
         sPause,
+        sFinished,
         sSettings,
         sScores
     };
@@ -67,6 +68,7 @@ void Game::Run()
         while(time_since_last_update > TIME_PER_FRAME)
         {
             time_since_last_update -= TIME_PER_FRAME;
+            m_screens[m_current_screen_index]->Update();
             if(m_state == State::Playing)
                 m_tick_event();
         }
@@ -78,6 +80,18 @@ void Game::Run()
 void Game::Shutdown()
 {
     m_app.Shutdown();
+}
+
+void Game::Reset()
+{
+    m_data.white_pawns.clear();
+    m_data.black_pawns.clear();
+    m_data.player_turn = !m_data.player_turn;
+    // hardcode pawn initial positions
+    InitPawnPositions(m_data.black_pawns, 0);
+    InitPawnPositions(m_data.white_pawns, 5);
+
+    OnStateChange(State::Playing);
 }
 
 void Game::AddStateChangeListener(core::EventHandler<State> state_changed)
@@ -98,19 +112,7 @@ void Game::OnDrawEvent()
 
 void Game::OnInput(core::Input::Key key)
 {
-    if(m_state != State::Playing)
-        return;
-    // not player turn yet
-    if(!m_data.player_turn)
-        return;
-
-    // react to player input
-    if(key == core::Input::Key::Space)
-        m_data.input_mode.Next();
-    else if(m_data.input_mode.mode == InputMode::Choosing)
-        MoveCursor(key);
-    else if(m_data.input_mode.mode == InputMode::Moving)
-        PlayerMovePawn(key);
+    m_screens[m_current_screen_index]->OnInput(key);
 }
 
 void Game::OnStateChange(State new_state)
@@ -126,23 +128,26 @@ void Game::OnStateChange(State new_state)
         m_current_screen_index = Screens::sGame;
         OnPlay();
         break;
-    case State::MainMenu:
-        OnMainMenu();
-        m_current_screen_index = Screens::sMainMenu;
+    case State::Finished:
+        OnFinished();
+        m_current_screen_index = Screens::sFinished;
         break;
     }
 }
 
 void Game::OnPause()
 {
+    m_current_screen_index = Screens::sPause;
 }
 
 void Game::OnPlay()
 {
+    m_current_screen_index = Screens::sGame;
 }
 
-void Game::OnMainMenu()
+void Game::OnFinished()
 {
+    m_current_screen_index = Screens::sFinished;
 }
 
 void Game::AddScreen(std::unique_ptr<core::Screen>&& screen_ptr)
@@ -158,6 +163,7 @@ void Game::LoadAssets()
     // pawn assets
     assets.MakeAsset<TextureAsset>("black_pawn"sv, "assets/sprites/blackPawn.png"sv);
     assets.MakeAsset<TextureAsset>("white_pawn"sv, "assets/sprites/whitePawn.png"sv);
+    assets.MakeAsset<FontAsset>("font", "assets/fonts/SIXTY.TTF");
 
     assets.Load();
 }
@@ -168,6 +174,7 @@ void Game::MakeEntities()
     m_entities_factory.MakeBoard();
     m_entities_factory.MakeAI();
     m_entities_factory.MakePlayer();
+    m_entities_factory.MakeText();
 
     // hardcode pawn initial positions
     InitPawnPositions(m_data.black_pawns, 0);
@@ -177,54 +184,6 @@ void Game::MakeEntities()
 void Game::InitScreens()
 {
     m_screen_factory.Init();
-}
-
-void Game::MoveCursor(core::Input::Key key)
-{
-    switch(key)
-    {
-    case core::Input::Key::Left:
-    case core::Input::Key::A:
-        m_data.cursor_tile.x--;
-        if(m_data.cursor_tile.x < 0)
-            m_data.cursor_tile.x = 0;
-        break;
-    case core::Input::Key::Right:
-    case core::Input::Key::D:
-        m_data.cursor_tile.x++;
-        if(m_data.cursor_tile.x > 7)
-            m_data.cursor_tile.x = 7;
-        break;
-    case core::Input::Key::Up:
-    case core::Input::Key::W:
-        m_data.cursor_tile.y--;
-        if(m_data.cursor_tile.y < 0)
-            m_data.cursor_tile.y = 0;
-        break;
-    case core::Input::Key::Down:
-    case core::Input::Key::S:
-        m_data.cursor_tile.y++;
-        if(m_data.cursor_tile.y > 7)
-            m_data.cursor_tile.y = 7;
-    default:
-        break;
-    }
-    GridComponent* grid = ECSManager::Instance().GetComponent<GridComponent>(m_data.board, "grid");
-    if(grid)
-        grid->SetActiveTile(m_data.cursor_tile.x, m_data.cursor_tile.y);
-}
-
-void Game::PlayerMovePawn(core::Input::Key key)
-{
-    EntityId pawn_id = FindActivePawn();
-    if(pawn_id == INVALID_ENTITY)
-        return;
-
-    if(MovePawn(pawn_id, key))
-    {
-        m_data.input_mode.mode = InputMode::Choosing;
-        m_data.player_turn = false;
-    }
 }
 
 bool Game::MovePawn(EntityId pawn_id, core::Input::Key key)
@@ -265,7 +224,8 @@ bool Game::MovePawn(EntityId pawn_id, core::Input::Key key)
     }
 
     // if no pawn here then move here
-    if(!PositionHasPawn(new_position))
+    bool is_black;
+    if(!PositionHasPawn(new_position, is_black))
     {
         pos->SetPosition(new_position.x, new_position.y);
         return true;
@@ -273,7 +233,7 @@ bool Game::MovePawn(EntityId pawn_id, core::Input::Key key)
     return false;
 }
 
-bool Game::PositionHasPawn(sf::Vector2i position)
+bool Game::PositionHasPawn(sf::Vector2i position, bool& is_black)
 {
     // Find if new position has pawn in it
     auto pred = [&position](EntityId pawn_id)
@@ -285,25 +245,17 @@ bool Game::PositionHasPawn(sf::Vector2i position)
     };
     auto white_it = std::find_if(m_data.white_pawns.begin(), m_data.white_pawns.end(), pred);
     if(white_it != m_data.white_pawns.end())
+    {
+        is_black = false;
         return true;
+    }
     auto black_it = std::find_if(m_data.black_pawns.begin(), m_data.black_pawns.end(), pred);
     if(black_it != m_data.black_pawns.end())
-        return true;
-    return false;
-}
-
-EntityId Game::FindActivePawn()
-{
-    auto it = std::find_if(m_data.white_pawns.begin(), m_data.white_pawns.end(), [this](EntityId pawn_id)
     {
-        PositionComponent* pos = ECSManager::Instance().GetComponent<PositionComponent>(pawn_id, "position");
-        if(pos)
-            return pos->GetPosition().first == m_data.cursor_tile.x && pos->GetPosition().second == m_data.cursor_tile.y;
-        return false;
-    });
-    if(it == m_data.white_pawns.end())
-        return INVALID_ENTITY;
-    return *it;
+        is_black = true;
+        return true;
+    }
+    return false;
 }
 
 void Game::InitPawnPositions(std::vector<EntityId>& pawns, int offset)

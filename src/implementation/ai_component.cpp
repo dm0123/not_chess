@@ -31,10 +31,11 @@ void AiComponent::MakeTurn()
     {
         auto position = pawn_pos->GetPosition();
         std::array<std::pair<sf::Vector2i, core::Input::Key>, 4> possible_moves =
-            { std::pair<sf::Vector2i, core::Input::Key>{sf::Vector2i(position.first -1 , position.second), core::Input::Key::Left},
-              std::pair<sf::Vector2i, core::Input::Key>{sf::Vector2i(position.first + 1, position.second), core::Input::Key::Right},
-              std::pair<sf::Vector2i, core::Input::Key>{sf::Vector2i(position.first , position.second -1 ), core::Input::Key::Up},
-              std::pair<sf::Vector2i, core::Input::Key>{sf::Vector2i(position.first , position.second + 1 ), core::Input::Key::Down}};
+              { std::pair<sf::Vector2i, core::Input::Key>{sf::Vector2i(position.first , position.second -1 ), core::Input::Key::Up},
+                std::pair<sf::Vector2i, core::Input::Key>{sf::Vector2i(position.first -1 , position.second), core::Input::Key::Left},
+                std::pair<sf::Vector2i, core::Input::Key>{sf::Vector2i(position.first , position.second + 1 ), core::Input::Key::Down},
+                std::pair<sf::Vector2i, core::Input::Key>{sf::Vector2i(position.first + 1, position.second), core::Input::Key::Right}
+                };
 
 
         auto& best_move = possible_moves[0];
@@ -47,7 +48,8 @@ void AiComponent::MakeTurn()
             if(possible_move_pos.first.x > 0 && possible_move_pos.first.x < 8
                     && possible_move_pos.first.y > 0 && possible_move_pos.first.y < 8)
             {
-                if(m_game->PositionHasPawn(possible_move_pos.first))
+                bool is_black = false;
+                if(m_game->PositionHasPawn(possible_move_pos.first, is_black))
                     continue;
                 int diff_x = m_current_target.first - possible_move_pos.first.x;
                 int diff_y = m_current_target.second - possible_move_pos.first.y;
@@ -87,7 +89,7 @@ void AiComponent::Update()
     MakeTurn();
 }
 
-std::string_view AiComponent::Name()
+std::string_view AiComponent::Name() const noexcept
 {
     return "ai"sv;
 }
@@ -99,11 +101,19 @@ void AiComponent::ChoosePawn()
         return;
 
     std::pair<int, int> const& current_pawn_position = pos->GetPosition();
-    if(current_pawn_position == m_current_target)
+    auto it = std::find_if(m_available_slots.begin(), m_available_slots.end(), [&current_pawn_position](std::pair<int, int>& slot)
+    {
+            return current_pawn_position.first == slot.first
+                   && current_pawn_position.second == slot.second;
+    });
+
+    if(it == m_available_slots.end())
+        return;
+
+    if(*it == m_current_target)
     {
         m_current_pawn = m_pawns_to_move.front();
         m_pawns_to_move.pop_front();
-
         m_current_target = m_available_slots.front();
         m_available_slots.pop_front();
     }

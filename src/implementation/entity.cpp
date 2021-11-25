@@ -20,16 +20,19 @@ void ECSManager::Init()
 
 EntityId ECSManager::MakeEntity(std::string name, std::vector<std::unique_ptr<AbstractComponent>>&& components)
 {
-    Entity new_e(std::move(name));
-    EntityId new_id = m_entities.size();
+    EntityId id = CreateEntity();
+    Entity& entity = Get(id);
+    entity.m_name = std::move(name);
+    entity.m_screen_pos.x = 0;
+    entity.m_screen_pos.y = 0;
+
     for(std::unique_ptr<AbstractComponent>& component : components)
     {
-        component->SetParent(new_id);
-        new_e.m_components.push_back(std::move(component));
+        component->SetParent(id);
+        entity.m_components.push_back(std::move(component));
     }
-    m_entities_by_name[std::string{ new_e.Name() }] = new_id;
-    m_entities.push_back(std::move(new_e));
-    return new_id;
+    m_entities_by_name[std::string{ entity.Name() }] = id;
+    return id;
 }
 
 Entity& ECSManager::Get(EntityId id)
@@ -78,6 +81,20 @@ std::vector<core::IDrawable*> ECSManager::CollectDrawables(EntityId e_id)
     return result;
 }
 
+void ECSManager::RecycleEntity(EntityId id)
+{
+    auto it = std::find(m_recycled_entities.begin(), m_recycled_entities.end(), id);
+    if(it != m_recycled_entities.end())
+        return;
+    m_recycled_entities.push_back(id);
+}
+
+void ECSManager::RecycleEntities(std::vector<EntityId> ids)
+{
+    for(auto id : ids)
+        RecycleEntity(id);
+}
+
 ECSManager::ECSManager() : m_game_tick_handler([this]()
                            {
                                for(Entity& e : m_entities)
@@ -90,11 +107,25 @@ ECSManager::ECSManager() : m_game_tick_handler([this]()
 {
 }
 
-Entity::Entity() = default;
-
-Entity::Entity(std::string name) : m_name(std::move(name))
+EntityId ECSManager::CreateEntity()
 {
+    if(!m_recycled_entities.empty())
+    {
+        EntityId old_id = m_recycled_entities.back();
+        Entity& old_e = Get(old_id);
+        m_recycled_entities.pop_back();
+        old_e.m_name.clear();
+        old_e.m_components.clear();
+        return old_id;
+    }
+
+    EntityId new_id = m_entities.size();
+    Entity new_e;
+    m_entities.push_back(std::move(new_e));
+    return new_id;
 }
+
+Entity::Entity() = default;
 
 void Entity::AddComponent(std::unique_ptr<AbstractComponent>&& c)
 {

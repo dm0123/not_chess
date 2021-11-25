@@ -12,14 +12,10 @@ void TextureAsset::Load()
     m_texture.loadFromFile(m_path);
 }
 
-void SpriteComponent::Init()
-{
-}
-
 void SpriteComponent::AddAsset(std::string_view name)
 {
     m_asset = core::AssetManager::Instance().GetHandleByName(name);
-    TextureAsset const& texture = static_cast<TextureAsset const&>(core::AssetManager::Instance().GetByName(name));
+    TextureAsset const& texture = static_cast<TextureAsset const&>(core::AssetManager::Instance().GetByHandle(m_asset));
     sf::Sprite sprite;
     sprite.setTexture(texture.Texture());
     m_drawable.SetSprite(sprite);

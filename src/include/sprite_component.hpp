@@ -27,9 +27,8 @@ private:
 class SpriteComponent : public AbstractComponent
 {
 public:
-    void Init() override;
     void AddAsset(std::string_view name) override;
-    std::string_view Name() override { return "sprite"sv; }
+    std::string_view Name() const noexcept override { return "sprite"sv; }
 private:
     core::AssetHandle m_asset;
     core::SimpleSpriteItem m_drawable;

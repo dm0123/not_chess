@@ -5,6 +5,7 @@
 #include <position_component.hpp>
 #include <input_component.hpp>
 #include <ai_component.hpp>
+#include <text_component.hpp>
 #include <game.hpp>
 
 #include <vector>
@@ -88,5 +89,56 @@ void GameEntitiesFactory::MakeAI() const
     components.push_back(std::move(ai_component));
     m_game.m_data.ai_player = ecs_instance.MakeEntity("ai_player", std::move(components));
 
+}
+
+void GameEntitiesFactory::MakeText() const
+{
+    auto& ecs_instance = ECSManager::Instance();
+    auto window_size = m_game.m_app.Window().getSize();
+
+    // Paused text
+    auto pause_text_component = std::make_unique<TextComponent>();
+    pause_text_component->AddAsset("font");
+    pause_text_component->SetString("Paused");
+    EntityId pause_text_id = ecs_instance.MakeEntity("pause_text", {});
+    Entity& pause_text = ecs_instance.Get(pause_text_id);
+    pause_text.AddComponent(std::move(pause_text_component));
+    pause_text.SetPosition( sf::Vector2i(window_size / 2u) );
+    m_game.m_data.paused_text = pause_text_id;
+
+
+    // your turn text
+    auto your_turn_text_component = std::make_unique<TextComponent>();
+    your_turn_text_component->AddAsset("font");
+    your_turn_text_component->SetString("Your turn");
+    your_turn_text_component->SetVisible(false);
+    EntityId your_turn_text_id = ecs_instance.MakeEntity("your_turn_text", {});
+
+    Entity& your_turn_text = ecs_instance.Get(your_turn_text_id);
+    your_turn_text.AddComponent(std::move(your_turn_text_component));
+    your_turn_text.SetPosition(sf::Vector2i(0, 8*64.f - 5)); // dirty computation of 'below board on a left'
+    m_game.m_data.your_turn_text = your_turn_text_id;
+
+    // General info text
+    auto general_info_text_component = std::make_unique<TextComponent>();
+    general_info_text_component->AddAsset("font");
+    general_info_text_component->SetString("Move cursor with arrows or WASD.\nChoose with SPACE and arrows or WASD.");
+    EntityId general_info_text_id = ecs_instance.MakeEntity("general_info_text", {});
+
+    Entity& general_info_text = ecs_instance.Get(general_info_text_id);
+    general_info_text.AddComponent(std::move(general_info_text_component));
+    general_info_text.SetPosition(sf::Vector2i(0, 8*64.f + 20)); // dirty computation of 'below board on a left'
+    m_game.m_data.general_info_text = general_info_text_id;
+
+    // Winner text
+    auto winner_text_component = std::make_unique<TextComponent>();
+    winner_text_component->AddAsset("font");
+    winner_text_component->SetString("Winner is:");
+    EntityId winner_text_id = ecs_instance.MakeEntity("winner_text", {});
+
+    Entity& winner_text = ecs_instance.Get(winner_text_id);
+    winner_text.AddComponent(std::move(winner_text_component));
+    winner_text.SetPosition(sf::Vector2i( window_size / 2u )); // dirty computation of 'below board on a left'
+    m_game.m_data.winner_text = winner_text_id;
 }
 } // namespace not_chess

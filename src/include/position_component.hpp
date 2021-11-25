@@ -19,7 +19,7 @@ public:
     }
 
     std::pair<int, int> const& GetPosition() const noexcept { return { m_row, m_column }; }
-    std::string_view Name() override { return "position"sv; }
+    std::string_view Name() const noexcept override { return "position"sv; }
     void Update() override { SetPosition(m_row, m_column); }
 private:
     int m_row;

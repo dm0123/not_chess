@@ -36,12 +36,16 @@ public:
     core::EventHandler<>& TickListener() noexcept { return m_game_tick_handler; }
 
     std::vector<core::IDrawable*> CollectDrawables(EntityId e_id);
+    void RecycleEntity(EntityId id);
+    void RecycleEntities(std::vector<EntityId> ids);
 private:
     ECSManager();
+    EntityId CreateEntity();
     std::unique_ptr<AbstractComponent>& ComponentByName(EntityId id, std::string_view name);
     // we may implement some sort of pool here
     // or just use entt library as underlying entity manager
     std::vector<Entity> m_entities;
+    std::vector<EntityId> m_recycled_entities;
     std::unordered_map<std::string, EntityId> m_entities_by_name;
     core::EventHandler<> m_game_tick_handler;
 };
@@ -50,7 +54,6 @@ class Entity
 {
     friend class ECSManager;
 public:
-    Entity(std::string name);
     Entity(Entity const& other) = default;
     Entity(Entity&& other) = default;
 

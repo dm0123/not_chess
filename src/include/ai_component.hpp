@@ -14,7 +14,7 @@ public:
     void MakeTurn();
     void SetGame(Game& game) noexcept;
     void Update() override;
-    std::string_view Name() override;
+    std::string_view Name() const noexcept override;
 private:
     void ChoosePawn();
 

@@ -26,7 +26,7 @@ public:
     void SetParent(EntityId parent) noexcept { m_parent = parent; }
 
     std::vector<core::IDrawable*> const& GetDrawables() const noexcept { return m_drawables; }
-    virtual std::string_view Name() = 0;
+    virtual std::string_view Name() const noexcept = 0;
     virtual void AddAsset(std::string_view asset_name) {}
 
     virtual void Init() {}

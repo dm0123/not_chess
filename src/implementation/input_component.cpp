@@ -17,7 +17,7 @@ void InputComponent::OnInput(core::Input::Key key)
     // TODO:
 }
 
-std::string_view InputComponent::Name()
+std::string_view InputComponent::Name() const noexcept
 {
     return "input"sv;
 }

@@ -7,17 +7,19 @@
 #include <core/scores.hpp>
 #include <core/sound.hpp>
 #include <core/settings.hpp>
+
 #include <entities_factory.hpp>
 #include <screen_factory.hpp>
-#include <SFML/System/Clock.hpp>
 #include <entity.hpp>
+
+#include <SFML/System/Clock.hpp>
 
 #include <memory>
 #include <vector>
-#include <optional>
 
 namespace not_chess
 {
+/// Main class which holds all data and screens
 class Game
 {
 public:
@@ -26,40 +28,25 @@ public:
 
     enum class State : int
     {
-        MainMenu, Playing, Paused
+        Finished, Playing, Paused
     };
-
-    enum class InputMode
-    {
-        Choosing,
-        Moving
-    };
-
-    struct PlayerInputMode
-    {
-        InputMode mode = InputMode::Choosing;
-        void Next() noexcept
-        {
-            if(mode == InputMode::Choosing)
-                mode = InputMode::Moving;
-            else mode = InputMode::Choosing;
-        }
-    };
-
 
     struct GameData
     {
         std::vector<EntityId> white_pawns;
         std::vector<EntityId> black_pawns;
 
-        EntityId player;
+        EntityId player; // TODO: unused
         EntityId ai_player;
         EntityId board;
 
+        EntityId paused_text;
+        EntityId your_turn_text;
+        EntityId general_info_text;
+        EntityId winner_text;
+
         bool player_turn { true };
-        std::optional<sf::Vector2i> active_tile;
-        sf::Vector2i cursor_tile {0, 0};
-        PlayerInputMode input_mode;
+        bool player_won { false };
     };
 
 
@@ -69,6 +56,7 @@ public:
     void Init();
     void Run();
     void Shutdown();
+    void Reset();
 
     void AddStateChangeListener(core::EventHandler<State> state_changed);
     void AddTickEventListener(core::EventHandler<> tick_listener);
@@ -80,21 +68,32 @@ public:
 
     void OnPause();
     void OnPlay();
-    void OnMainMenu();
+    void OnFinished();
 
     void AddScreen(std::unique_ptr<core::Screen>&& screen_ptr);
-    GameData& Data() { return m_data; }
+    GameData& Data() noexcept { return m_data; }
+    State CurrentState() const noexcept { return m_state; }
 
+    /**
+     * @brief MovePawn move pawn to direction
+     * @param pawn pawn id
+     * @param key arrows or WASD controls
+     * @return true if pawn was moved
+     */
     bool MovePawn(EntityId pawn, core::Input::Key key);
-    bool PositionHasPawn(sf::Vector2i pos);
+
+    /**
+     * @brief PositionHasPawn return if there is pawn on those coordinates
+     * @param pos position to check
+     * @param is_black true if pawn on this position is black. Do not check this if return value is false
+     * @return true if position has pawn
+     */
+    bool PositionHasPawn(sf::Vector2i pos, bool& is_black);
 
 private:
     void LoadAssets();
     void MakeEntities();
     void InitScreens();
-
-    void MoveCursor(core::Input::Key key);
-    void PlayerMovePawn(core::Input::Key key);
 
     EntityId FindActivePawn();
 

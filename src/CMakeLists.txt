@@ -25,6 +25,10 @@ target_sources(not_chess PRIVATE
   include/entities_factory.hpp
   include/position_component.hpp
   include/ai_component.hpp
+  include/game_screen.hpp
+  include/text_component.hpp
+  include/pause_screen.hpp
+  include/finished_screen.hpp
 
   implementation/app.cpp
   implementation/game.cpp
@@ -37,6 +41,10 @@ target_sources(not_chess PRIVATE
   implementation/entity.cpp
   implementation/screen_factory.cpp
   implementation/entities_factory.cpp
+  implementation/game_screen.cpp
+  implementation/text_component.cpp
+  implementation/pause_screen.cpp
+  implementation/finished_screen.cpp
 
   implementation/input_component.cpp
   implementation/sound_component.cpp
